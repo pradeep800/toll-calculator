@@ -1,0 +1,20 @@
+FROM golang:latest AS builder
+
+WORKDIR /app
+
+COPY ./go.mod .
+COPY ./go.sum .
+
+RUN go mod download
+
+COPY . .
+
+RUN GOOS=linux go build -o agg ./aggregator
+
+FROM alpine:3.18
+
+WORKDIR /app
+
+COPY --from=builder /app/agg .
+# COPY --from=builder /app/.env .
+CMD ["/app/agg"]
